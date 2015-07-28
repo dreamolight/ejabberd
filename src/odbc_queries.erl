@@ -304,9 +304,12 @@ add_spool_sql(Username, XML) ->
     [<<"insert into spool(username, xml) values ('">>,
      Username, <<"', '">>, XML, <<"');">>].
 
-add_spool_sql(Username, XML, Robot) ->
-	[<<"insert into spool(username, xml, robot) values ('">>,
-     Username, <<"', '">>, XML, <<"', ">>,Robot,<<");">>].
+add_spool_sql(Username, XML, RobotTag) ->
+	case RobotTag of 
+		1 -> [<<"insert into spool(username, xml, robot) values ('">>,Username, <<"', '">>, XML, <<"', ">>,<<"1">>,<<");">>];
+		_ -> [<<"insert into spool(username, xml, robot) values ('">>,Username, <<"', '">>, XML, <<"');">>]
+	end.
+	
 
 add_spool(LServer, Queries) ->
     ejabberd_odbc:sql_transaction(LServer, Queries).
