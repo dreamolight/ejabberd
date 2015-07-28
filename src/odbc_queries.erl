@@ -307,7 +307,7 @@ add_spool_sql(Username, XML) ->
 add_spool_sql(Username, XML, RobotTag) ->
 	case RobotTag of 
 		1 -> [<<"insert into spool(username, xml, robot) values ('">>,Username, <<"', '">>, XML, <<"', ">>,<<"1">>,<<");">>];
-		_ -> [<<"insert into spool(username, xml, robot) values ('">>,Username, <<"', '">>, XML, <<"');">>]
+		_ -> [<<"insert into spool(username, xml) values ('">>,Username, <<"', '">>, XML, <<"');">>]
 	end.
 	
 
