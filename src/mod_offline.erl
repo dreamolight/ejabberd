@@ -224,13 +224,14 @@ store_offline_msg(Host, {User, _Server}, Msgs, Len, MaxOfflineMsgs, odbc) ->
 				     Packet =
 					 jlib:replace_from_to(From, To,
 							      M#offline_msg.packet),
+					 Robot = get_robot(Packet),
 				     NewPacket =
 					 jlib:add_delay_info(Packet, Host,
 							     M#offline_msg.timestamp,
 							     <<"Offline Storage">>),
 				     XML =
 					 ejabberd_odbc:escape(xml:element_to_binary(NewPacket)),
-				     odbc_queries:add_spool_sql(Username, XML)
+				     odbc_queries:add_spool_sql(Username, XML, Robot)
 			     end,
 			     Msgs),
 	   odbc_queries:add_spool(Host, Query)
@@ -252,6 +253,30 @@ store_offline_msg(Host, {User, _}, Msgs, Len, MaxOfflineMsgs,
 					[{i, TS}, {'2i', [{<<"us">>, US}]}])
               end, Msgs)
     end.
+
+get_robot({xmlel, Name, La, Lc}) -> 
+	case Name of
+		<<"body">> -> get_robot_attribute(La);
+		_ -> get_robot(Lc)
+	end;
+
+get_robot([H|T]) ->
+	case H of
+		{xmlel,<<"body">>, La, _} -> get_robot_attribute(La);
+		{xmlel, _, _, L} -> get_robot(L);
+		_ -> get_robot(T)
+	end;
+
+get_robot([]) -> 0 . 
+
+
+get_robot_attribute([H|T]) ->
+	case H of 
+		{<<"robot">>,Value} -> erlang:list_to_integer(binary_to_list(Value));
+		_ -> get_robot_attribute(T)
+	end;
+
+get_robot_attribute([]) -> 0.
 
 %% Function copied from ejabberd_sm.erl:
 get_max_user_messages(AccessRule, {User, Server}, Host) ->
